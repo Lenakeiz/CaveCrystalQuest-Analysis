@@ -1,0 +1,33 @@
+---
+title: "power_analysis_path_integration"
+output: html_document
+date: "2023-10-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(pwr)
+library(tidyverse)
+
+```
+```{r}
+m1 = 0.94 #young
+m2 = 0.82 #healthy elderly
+se1 = 0.14
+se2 = 0.15
+n1 = 31
+n2 = 36
+weighted_pooled_SD = sqrt(((n1-1)*se1^2+(n2-1)*se2^2)/(n1+n2-2))
+d = (m1 - m2)/weighted_pooled_SD
+pwr.t.test(d=d,sig.level = 0.05,power = 0.8)
+
+```
+```{r}
+pwr.anova.test(k=3,f=d/2,sig.level=0.05,power=0.8)
+```
+
