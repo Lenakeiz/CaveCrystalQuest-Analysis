@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation,PillowWriter
 from matplotlib.patches import Arc, RegularPolygon
 import math
-
+import os
 
 def drawCircArrow(ax,radius,centX,centY,angle_,theta2_,orientation_,arrowDirection_,color_):
     
@@ -21,7 +21,7 @@ def drawCircArrow(ax,radius,centX,centY,angle_,theta2_,orientation_,arrowDirecti
     # Make sure you keep the axes scaled or else arrow will distort
     ax.set_xlim([centX-radius,centY+radius]) and ax.set_ylim([centY-radius,centY+radius]) 
     
-def visualise_ccq_trial(d):
+def visualise_ccq_trial(d,trial_num):
 
     # a: plot starting corner
     plt.plot(d['startingCorner_x'],d['startingCorner_z'],marker="o",markersize=12, color=[244/255,232/255,108/255])
@@ -88,7 +88,29 @@ def visualise_ccq_trial(d):
     plt.ylabel('Z Position', fontsize=10)
     plt.xlim([-3,3])
     plt.ylim([-3,3])
-    plt.title('Trial Route')
+    plt.title(f'Trial {trial_num} Route')
+    
+    # k: calculate linear and angular error
+    encoding_distance = d['encodingDistance']   
+    production_distance = np.sqrt((d['productionDistance_x'] - d['turningEncodingPosition_x'])**2 + (d['productionDistance_z'] - d['turningEncodingPosition_z'])**2)
+    linear_error = (production_distance - encoding_distance)/encoding_distance
+    
+    encoding_angle = d['encodingAngle']
+
+    if d['encodingAngle'] < 180:
+        if d['isEncodingClockwise'] == d['isProductionClockwise']:
+            homing_angle = 180 - encoding_angle
+        else:
+            homing_angle = 180 + encoding_angle
+    else:
+        if d['isEncodingClockwise'] == d['isProductionClockwise']:
+            homing_angle = 540 - encoding_angle
+        else:
+            homing_angle = encoding_angle - 180
+
+    production_angle = normalise_angle(theta2_) 
+    angular_error = (production_angle - homing_angle)/homing_angle
+    print(f"the encoding_angle is {encoding_angle}, the homing_angle is {homing_angle}, the production_angle is {production_angle}, the angular error is {angular_error}. the encoding distance is {encoding_distance}, the production distance is {production_distance}, the linear error is {linear_error}")
 
 def animate(i):
     tmp = st_tracking.iloc[:i,:]
@@ -96,37 +118,49 @@ def animate(i):
     ax.clear()
     ax.set_xlabel('X Position', fontsize=10)
     ax.set_ylabel('Z Position', fontsize=10)
-    ax.set_title('Trial Motion')
+    ax.set_title(f'Trial {trial_num} Motion')
     ax.set_xlim([-3,3])
     ax.set_ylim([-3,3])
-    scat = ax.scatter(tmp['position_x'], tmp['position_z'], c=tmp['timestamp'],cmap='viridis_r')
+    scat = ax.scatter(tmp['position_x'], tmp['position_z'], c=tmp['timestamp'],cmap='viridis_r',alpha=0.7)
     quiv = ax.quiver(tmp_q['position_x'],tmp_q['position_z'],
                       tmp_q['normdir_x'],tmp_q['normdir_z'],
-                      color='purple',headwidth=4,headlength=4,headaxislength=3,scale=30)
+                      color='purple',headwidth=4,headlength=5,headaxislength=4,scale=30)
     
     return scat,quiv
 
-data = pd.read_csv('data/0000.csv')
-data_tracking = pd.read_csv('data/0000_tracking.csv')
+def normalise_angle(angle):
+    if angle > 360:
+        return angle - 360
+    elif angle < 0:
+        return angle + 360
+    else:
+        return angle
+
+subjid = 2
+data = pd.read_csv(os.path.abspath(f"../data/{subjid}.csv"))
+data_tracking = pd.read_csv(os.path.abspath(f'../data/{subjid}_tracking.csv'))
 data_tracking['norm_vector'] = np.sqrt(1/(data_tracking['forward_x']**2+data_tracking['forward_z']**2))
 data_tracking['normdir_x'] = data_tracking['forward_x']*data_tracking['norm_vector']
 data_tracking['normdir_z'] = data_tracking['forward_z']*data_tracking['norm_vector']
 for trial_num in data_tracking['sequenceNumber'].unique(): 
     st_tracking = data_tracking[data_tracking['sequenceNumber']==trial_num]
     single_trial = data[data['sequenceNumber']==trial_num].squeeze().to_dict() 
+    # route between start walking and finish pointing
     t_start = single_trial['timeAtStartEncodingDistance']
     t_end = single_trial['timeAtEndProductionDistance']
+    # route between finish walking and start turning
+    # t_start = single_trial['timeAtEndEncodingDistance']
+    # t_end = single_trial['timeAtStartEncodingAngle']
     st_tracking = st_tracking[st_tracking['timestamp'].between(t_start,t_end)]    
-    fig = plt.figure(figsize=(12,5))
-
+    fig = plt.figure(figsize=(18,7))
     ax = fig.add_subplot(121)
     scat = ax.scatter([], [], [])
     quiv = ax.quiver([],[],[],[])
-    anim = FuncAnimation(fig, animate, frames=2000, interval=100, repeat=False)
+    anim = FuncAnimation(fig, animate, frames=5000, interval=100, repeat=False)
     fig.add_subplot(122)
-    visualise_ccq_trial(single_trial) 
+    visualise_ccq_trial(single_trial,trial_num) 
     plt.show()
     #anim.save(f'3_{trial_num}.gif', writer=PillowWriter(fps=10))
-    print(t_start,t_end)
-    print(st_tracking)
-
+    
+    
+    

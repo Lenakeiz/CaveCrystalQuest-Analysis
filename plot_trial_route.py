@@ -90,8 +90,8 @@ def visualise_ccq_trial(d):
     plt.ylim([-2,2])
     plt.title('Trial Route')
     plt.axis('equal')
-    plt.show()
- 
+    plt.show()  
+    
 data = pd.read_csv('3.csv')
 for trial_num in data['sequenceNumber']:
     single_trial = data.iloc[[trial_num]].squeeze().to_dict()   
