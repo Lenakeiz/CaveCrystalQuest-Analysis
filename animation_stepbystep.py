@@ -106,8 +106,8 @@ def animate(i):
     quiv = plt.quiver(tmp_q['position_x'],tmp_q['position_z'],
                       tmp_q['normdir_x'],tmp_q['normdir_z'],
                       color='purple',headwidth=8,headlength=8,headaxislength=5,scale=20)
-    add_route(tmp_q,single_trial,ax)
-    return scat,quiv
+    rout = add_route(tmp_q,single_trial,ax)
+    return scat,quiv,rout,
 
 
 def normalise_angle(angle):
@@ -134,8 +134,10 @@ for trial_num in data_tracking['sequenceNumber'].unique():
     st_tracking = st_tracking[st_tracking['timestamp'].between(t_start,t_end)]    
     fig = plt.figure(figsize=(7,7))
     ax = fig.add_subplot(111)
-    anim = FuncAnimation(fig, animate, frames=len(st_tracking)-1, interval=1, repeat=False) #frames: length of animation, interval: time between fram n-1 and n
-    plt.show()
-    #anim.save(f'../animation/subj{subjid}_trial{trial_num}.gif', writer=PillowWriter(fps=30))
+    scat = ax.scatter([], [], [])
+    quiv = ax.quiver([],[],[],[])
+    rout = ax.plot(single_trial['startingCorner_x'],single_trial['startingCorner_z'],marker="o",markersize=8, color=[244/255,232/255,108/255])
+    anim = FuncAnimation(fig, animate, frames=len(st_tracking), interval=1, repeat=False) #frames: length of animation, interval: time between fram n-1 and n
+    anim.save(f'../animation/subj{subjid}_trial{trial_num}.gif', writer=PillowWriter(fps=30))
 
 
