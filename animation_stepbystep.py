@@ -139,5 +139,5 @@ for trial_num in data_tracking['sequenceNumber'].unique():
     rout = ax.plot(single_trial['startingCorner_x'],single_trial['startingCorner_z'],marker="o",markersize=8, color=[244/255,232/255,108/255])
     anim = FuncAnimation(fig, animate, frames=len(st_tracking), interval=1, repeat=False) #frames: length of animation, interval: time between fram n-1 and n
     anim.save(f'../animation/subj{subjid}_trial{trial_num}.gif', writer=PillowWriter(fps=30))
-
+    plt.show()
 
