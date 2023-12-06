@@ -136,7 +136,7 @@ def normalise_angle(angle):
     else:
         return angle
 
-subjid = 2
+subjid = 3
 data = pd.read_csv(os.path.abspath(f"../data/{subjid}.csv"))
 data_tracking = pd.read_csv(os.path.abspath(f'../data/{subjid}_tracking.csv'))
 data_tracking['norm_vector'] = np.sqrt(1/(data_tracking['forward_x']**2+data_tracking['forward_z']**2))
@@ -148,7 +148,7 @@ for trial_num in data_tracking['sequenceNumber'].unique():
     # route between start walking and finish pointing
     t_start = single_trial['timeAtStartEncodingDistance']
     t_end = single_trial['timeAtEndProductionDistance']
-    # route between finish walking and start turning
+    # # route between finish walking and start turning
     # t_start = single_trial['timeAtEndEncodingDistance']
     # t_end = single_trial['timeAtStartEncodingAngle']
     st_tracking = st_tracking[st_tracking['timestamp'].between(t_start,t_end)]    
@@ -156,11 +156,13 @@ for trial_num in data_tracking['sequenceNumber'].unique():
     ax = fig.add_subplot(121)
     scat = ax.scatter([], [], [])
     quiv = ax.quiver([],[],[],[])
-    anim = FuncAnimation(fig, animate, frames=5000, interval=100, repeat=False)
+    anim = FuncAnimation(fig, animate, frames=1000, interval=1, repeat=False) #frames: length of animation, interval: time between fram n-1 and n
     fig.add_subplot(122)
     visualise_ccq_trial(single_trial,trial_num) 
     plt.show()
-    #anim.save(f'3_{trial_num}.gif', writer=PillowWriter(fps=10))
+    anim.save(f'../animation/subj{subjid}_trial{trial_num}.gif', writer=PillowWriter(fps=30))
+
+
     
     
     
