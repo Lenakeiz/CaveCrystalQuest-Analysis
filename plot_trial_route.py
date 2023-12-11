@@ -17,20 +17,20 @@ def normalise_angle(angle):
     else:
         return angle
    
-def drawCircArrow(ax,radius,centX,centY,angle_,theta2_,orientation_,arrowDirection_,color_,linewidth = 1.2):
+def drawCircArrow(ax,radius,centX,centY,angle_,theta2_,orientation_,arrowDirection_,color_,linewidth = 1.2,label=None):
     
-    #Create the line   
-    arc = Arc([centX,centY],radius,radius,angle=angle_,theta1=0,theta2=theta2_,capstyle='round',linestyle=':',lw=linewidth,color=color_)
+    # Create the arc (circle in this case)
+    arc = Arc([centX, centY], radius*2, radius*2, angle=angle_, theta1=0, theta2=theta2_, capstyle='round', linestyle='-', lw=linewidth, color=color_)
     ax.add_patch(arc)
     
-    #Create triangle as arrow head
-    arrowHead_X=centX+(radius/2)*np.cos(math.radians(arrowDirection_)) #Do trig to determine crystalOrigin_ position
-    arrowHead_Y=centY+(radius/2)*np.sin(math.radians(arrowDirection_))  
-    arrowHead = RegularPolygon((arrowHead_X, arrowHead_Y),numVertices=3,radius=radius/20,orientation=orientation_,color=color_,linewidth=linewidth)
+    # Create triangle as arrow head (not needed for a full circle, but included as per function definition)
+    arrowHead_X = centX + (radius * np.cos(math.radians(arrowDirection_)))
+    arrowHead_Y = centY + (radius * np.sin(math.radians(arrowDirection_)))
+    arrowHead = RegularPolygon((arrowHead_X, arrowHead_Y), numVertices=3, radius=radius/20, orientation=orientation_, color=color_, linewidth=linewidth, label=label)
     ax.add_patch(arrowHead)
     
     # Make sure you keep the axes scaled or else arrow will distort
-    ax.set_xlim([centX-radius,centY+radius]) and ax.set_ylim([centY-radius,centY+radius]) 
+    #ax.set_xlim([centX-radius,centY+radius]) and ax.set_ylim([centY-radius,centY+radius]) 
     
 def visualise_ccq_trial(d,trial_num):
     
@@ -38,26 +38,30 @@ def visualise_ccq_trial(d,trial_num):
     head_width = 0.1
     line_width= 2
     starting_marker_size = 12
-    crystal_marker_size_spawn = 9
-    crystal_marker_size_reposition = 16
+    crystal_marker_size_spawn = 15
+    crystal_marker_size_reposition = 15
     starting_position_color = color_palette[4]
     arrow_encoding_distance_color = color_palette[4]
     fog_position_color = color_palette[0]
     encoding_angle_color = color_palette[1]
     production_angle_color = color_palette[2]
     circular_arrow_width = 3.0
-    text_font_size = 15
-    text_font_size_title = 20
+    text_font_size = 16
+    text_font_ticks = 13
+    text_font_size_title = 19
 
 
     plt.figure(figsize=(10,10))
+    ax = plt.gca()
+    ax.set_aspect('equal', adjustable='box')  # Ensures circles are not distorted
+
     # a: plot starting corner
     plt.plot(d['startingCorner_x'],d['startingCorner_z'],marker="o",markersize=starting_marker_size, color=arrow_encoding_distance_color)    
     
     # b: plot walking path
     dx = (d['turningEncodingPosition_x'] - d['startingCorner_x']) *1.0
     dz = (d['turningEncodingPosition_z'] - d['startingCorner_z']) *1.0
-    plt.arrow(d['startingCorner_x'], d['startingCorner_z'], dx, dz,head_width = head_width,lw=line_width,color=arrow_encoding_distance_color,length_includes_head=True)
+    plt.arrow(d['startingCorner_x'], d['startingCorner_z'], dx, dz,head_width = head_width,lw=line_width,color=arrow_encoding_distance_color,length_includes_head=True, label="Encoding Distance")
     
     # b: plot standing position in the fog
     plt.plot(d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],marker="o",markersize=starting_marker_size, color=fog_position_color)
@@ -77,18 +81,7 @@ def visualise_ccq_trial(d,trial_num):
     crystalDirection = originalAngle-math.radians(encodingAngle)
     crystalOrigin_x = d['turningEncodingPosition_x'] + math.cos(crystalDirection)
     crystalOrigin_z = d['turningEncodingPosition_z'] + math.sin(crystalDirection)
-    plt.plot(crystalOrigin_x,crystalOrigin_z,marker="d",markersize=crystal_marker_size_spawn,color="blue",alpha=1.0)
-
-    # f: plot the direction facing where the crystal is found
-    plt.plot([d['turningEncodingPosition_x'], crystalOrigin_x], [d['turningEncodingPosition_z'], crystalOrigin_z], linestyle=':', color=encoding_angle_color)
     
-    # h: plot where cystal is placed
-    plt.plot(d['productionDistance_x'],d['productionDistance_z'],marker="d",markersize=crystal_marker_size_reposition,color=production_angle_color)
-
-    # g: plot homing direction
-    plt.arrow(d['turningEncodingPosition_x'], d['turningEncodingPosition_z'], d['productionDirection_x'], d['productionDirection_z'],head_width = head_width,lw=line_width,color=production_angle_color, length_includes_head=True)
-        
-    ax = plt.gca()
     # i: plot encoding angle
     theta2_ = d['encodingAngle']
     if d['isEncodingClockwise']:
@@ -99,7 +92,7 @@ def visualise_ccq_trial(d,trial_num):
         angle_ = math.degrees(originalAngle)
         orientation_ = math.radians(angle_+theta2_)
         arrowDirection_ = theta2_+angle_
-    drawCircArrow(ax,1,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_=encoding_angle_color, linewidth=circular_arrow_width)
+    drawCircArrow(ax,0.5,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_=encoding_angle_color, linewidth=circular_arrow_width, label="Encoding Angle")
     
     # j: plot production angle    
     productionDirection = math.degrees(math.atan2(d['productionDirection_z'],d['productionDirection_x']))
@@ -113,16 +106,36 @@ def visualise_ccq_trial(d,trial_num):
         theta2_ = productionDirection - angle_
         orientation_ = math.radians(angle_+theta2_)
         arrowDirection_ = theta2_+angle_         
-    ap = plt.gca()
-    drawCircArrow(ap,1.5,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linewidth=circular_arrow_width)
+    drawCircArrow(ax,1.0,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linewidth=circular_arrow_width, label="Production Angle")
     
+    plt.plot(crystalOrigin_x,crystalOrigin_z,marker="d",markersize=crystal_marker_size_spawn,color=encoding_angle_color,alpha=1.0)
+
+    # f: plot the direction facing where the crystal is found
+    plt.plot([d['turningEncodingPosition_x'], crystalOrigin_x], [d['turningEncodingPosition_z'], crystalOrigin_z], linestyle=':', lw=line_width, color=encoding_angle_color)
+
+    # g: plot homing direction
+    start_x = d['turningEncodingPosition_x']
+    start_z = d['turningEncodingPosition_z']
+    end_x = start_x + d['productionDirection_x']
+    end_z = start_z + d['productionDirection_z']
+    plt.plot([d['turningEncodingPosition_x'], d['productionDistance_x']], [d['turningEncodingPosition_z'], d['productionDistance_z']], lw=line_width, linestyle='--', color=production_angle_color, label="Production Distance")
+    #plt.arrow(d['turningEncodingPosition_x'], d['turningEncodingPosition_z'], d['productionDirection_x'], d['productionDirection_z'],head_width = head_width,lw=line_width,color=production_angle_color, length_includes_head=True)
+
+    # h: plot where cystal is placed
+    plt.plot(d['productionDistance_x'],d['productionDistance_z'],marker="d",markersize=crystal_marker_size_reposition,color=production_angle_color)
+         
     # Set the limits for x-axis and y-axis
-    plt.xlim(-2.5, 2.5)
-    plt.ylim(-2.5, 2.5)
+    plt.xlim(-3, 3)
+    plt.ylim(-3, 3)
     plt.xlabel('X Position', fontsize=text_font_size)
     plt.ylabel('Z Position', fontsize=text_font_size)
+    plt.xticks(fontsize=text_font_ticks)
+    plt.yticks(fontsize=text_font_ticks)
     plt.axis('equal')
-    plt.title(f'Trial {trial_num} Route', fontsize=text_font_size_title)
+
+    plt.legend(loc='best', fontsize=text_font_ticks)
+
+    plt.title(f'Trial {trial_num}', fontsize=text_font_size_title)
     
     return theta2_
 
