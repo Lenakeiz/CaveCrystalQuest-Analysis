@@ -46,8 +46,8 @@ def visualise_ccq_trial(d,trial_num):
     encoding_angle_color = color_palette[1]
     production_angle_color = color_palette[2]
     circular_arrow_width = 3.0
-    text_font_size = 10
-    text_font_size_title = 10
+    text_font_size = 15
+    text_font_size_title = 20
 
 
     plt.figure(figsize=(10,10))
@@ -99,7 +99,7 @@ def visualise_ccq_trial(d,trial_num):
         angle_ = math.degrees(originalAngle)
         orientation_ = math.radians(angle_+theta2_)
         arrowDirection_ = theta2_+angle_
-    drawCircArrow(ax,1,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_='green', linewidth=circular_arrow_width)
+    drawCircArrow(ax,1,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_=encoding_angle_color, linewidth=circular_arrow_width)
     
     # j: plot production angle    
     productionDirection = math.degrees(math.atan2(d['productionDirection_z'],d['productionDirection_x']))
@@ -114,15 +114,15 @@ def visualise_ccq_trial(d,trial_num):
         orientation_ = math.radians(angle_+theta2_)
         arrowDirection_ = theta2_+angle_         
     ap = plt.gca()
-    drawCircArrow(ap,1.5,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_='blue')
+    drawCircArrow(ap,1.5,d['turningEncodingPosition_x'],d['turningEncodingPosition_z'],angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linewidth=circular_arrow_width)
     
     # Set the limits for x-axis and y-axis
     plt.xlim(-2.5, 2.5)
     plt.ylim(-2.5, 2.5)
-    plt.xlabel('X Position', fontsize=10)
-    plt.ylabel('Z Position', fontsize=10)
+    plt.xlabel('X Position', fontsize=text_font_size)
+    plt.ylabel('Z Position', fontsize=text_font_size)
     plt.axis('equal')
-    plt.title(f'Trial {trial_num} Route', fontsize=10)
+    plt.title(f'Trial {trial_num} Route', fontsize=text_font_size_title)
     
     return theta2_
 
