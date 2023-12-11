@@ -125,18 +125,18 @@ def calculate_error(d,theta2_):
     return trial_error
     # print(f"Trial the encoding_angle is {encoding_angle}, the homing_angle is {homing_angle}, the production_angle is {production_angle}, the angular error is {angular_error:3f}. the encoding distance is {encoding_distance:3f}, the production distance is {production_distance:3f}, the linear error is {linear_error:3f}")
 
-    
-subjid = input("Enter the participant ID: ")
-data = pd.read_csv(os.path.abspath(f"../data/{subjid}.csv"))
-error_stats = pd.DataFrame(columns=['encoding_angle', 'homing_angle', 'production_angle', 'angular_error', 'encoding_distance','production_distance', 'linear_error'])
+if __name__ == "__main__":
+    subjid = input("Enter the participant ID: ")
+    data = pd.read_csv(os.path.abspath(f"data/{subjid}.csv"))
+    error_stats = pd.DataFrame(columns=['encoding_angle', 'homing_angle', 'production_angle', 'angular_error', 'encoding_distance','production_distance', 'linear_error'])
 
-for trial_num in data['sequenceNumber']:
-    single_trial = data.iloc[[trial_num-1]].squeeze().to_dict()   
-    theta2_ = visualise_ccq_trial(single_trial,trial_num)
-    trial_error = calculate_error(single_trial,theta2_)
-    new_trial_error = pd.DataFrame([trial_error], columns=error_stats.columns)
-    error_stats = pd.concat([error_stats, new_trial_error], ignore_index=True)
-    error_stats.to_csv(f'../error_stats/error{subjid}.csv')
+    for trial_num in data['sequenceNumber']:
+        single_trial = data.iloc[[trial_num-1]].squeeze().to_dict()   
+        theta2_ = visualise_ccq_trial(single_trial,trial_num)
+        trial_error = calculate_error(single_trial,theta2_)
+        new_trial_error = pd.DataFrame([trial_error], columns=error_stats.columns)
+        error_stats = pd.concat([error_stats, new_trial_error], ignore_index=True)
+        error_stats.to_csv(f'../error_stats/error{subjid}.csv')
     
     
     
