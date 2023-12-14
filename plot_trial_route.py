@@ -143,7 +143,7 @@ def calculate_error(d,theta2_):
     # k: calculate linear and angular error
     encoding_distance = d['encodingDistance']   
     production_distance = np.sqrt((d['productionDistance_x'] - d['turningEncodingPosition_x'])**2 + (d['productionDistance_z'] - d['turningEncodingPosition_z'])**2)
-    linear_error = (production_distance - encoding_distance)/encoding_distance
+    linear_error = production_distance/encoding_distance
     
     encoding_angle = d['encodingAngle']
 
@@ -159,7 +159,7 @@ def calculate_error(d,theta2_):
             homing_angle = encoding_angle - 180
 
     production_angle = normalise_angle(theta2_) 
-    angular_error = (production_angle - homing_angle)/homing_angle
+    angular_error = production_angle/homing_angle
     trial_error = [encoding_angle, homing_angle, np.round(production_angle,3), np.round(angular_error,3), encoding_distance,np.round(production_distance,3), np.round(linear_error,3)]
     return trial_error
     # print(f"Trial the encoding_angle is {encoding_angle}, the homing_angle is {homing_angle}, the production_angle is {production_angle}, the angular error is {angular_error:3f}. the encoding distance is {encoding_distance:3f}, the production distance is {production_distance:3f}, the linear error is {linear_error:3f}")
@@ -226,10 +226,12 @@ if __name__ == "__main__":
 
                     single_trial = data.iloc[[trial_num-1]].squeeze().to_dict()   
                     theta2_ = visualise_ccq_trial(single_trial,trial_num)
-                    #trial_error = calculate_error(single_trial,theta2_)
-                    #new_trial_error = pd.DataFrame([trial_error], columns=error_stats.columns)
-                    #error_stats = pd.concat([error_stats, new_trial_error], ignore_index=True)
-                    #error_stats.to_csv(f'../error_stats/error{subjid}.csv')
+                    
+                    # calculate production error for each trial and save it to error_stats folder
+                    trial_error = calculate_error(single_trial,theta2_)
+                    new_trial_error = pd.DataFrame([trial_error], columns=error_stats.columns)
+                    error_stats = pd.concat([error_stats, new_trial_error], ignore_index=True)
+                    error_stats.to_csv(f'output/error_stats/error_{subjid}.csv')
 
                     # Get the current figure and save it
                     fig = plt.gcf()
