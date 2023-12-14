@@ -10,10 +10,14 @@ from config import folder_names
 from config import color_palette
 
 def normalise_angle(angle):
-    if angle > 360:
+    if angle > 720:
+        return angle - 720
+    if angle > 360 and angle < 720:
         return angle - 360
-    elif angle < 0:
+    if angle < 0 and angle > -360:
         return angle + 360
+    elif angle < -360:
+        return angle + 720
     else:
         return angle
    
