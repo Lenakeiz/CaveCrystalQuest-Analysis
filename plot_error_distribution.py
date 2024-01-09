@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # from plot_trial_route generate production error csv file
-folder_path = 'output/error_stats'  # Replace with the path to your folder
+folder_path = os.path.join(os.path.dirname(__file__),'output/error_stats') # Replace with the path to your folder
 all_files = os.listdir(folder_path)
 
 # List to hold data from all files
