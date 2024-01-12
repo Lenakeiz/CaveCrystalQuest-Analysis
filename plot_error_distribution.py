@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -20,6 +21,11 @@ for file in all_files:
 # Combine all data into a single DataFrame
 combined_df = pd.concat(all_data, ignore_index=True)
 
+def arrange_array(arr):
+    sorted_arr = np.sort(arr)
+    arranged_arr = np.array([sorted_arr[0], 360 - sorted_arr[0], sorted_arr[1], 360 - sorted_arr[1]])
+    return arranged_arr
+
 # f = sns.FacetGrid(combined_df, col='encoding_angle', col_wrap=4) 
 # f.map(sns.histplot, 'angular_error',binwidth=0.05,kde=True)
 # f.set(xlim=(0,2),xlabel='Angular Error')
@@ -38,7 +44,8 @@ combined_df = pd.concat(all_data, ignore_index=True)
 
 # Is production the only source of angular error?
 fig, axs = plt.subplots(1, 4, figsize=(16, 5))
-for n,homing_angle in enumerate(combined_df['homing_angle'].unique()):
+arranged_homing_angles = arrange_array(combined_df['homing_angle'].unique())
+for n,homing_angle in enumerate(arranged_homing_angles):
     subset = combined_df[combined_df['homing_angle'] == homing_angle]
     subset['angular_difference'] = subset['production_angle'] - homing_angle
     ax = axs[n]
@@ -51,7 +58,8 @@ plt.show()
 
 # Is encoding the only source of angular error?
 fig, axs = plt.subplots(1, 4, figsize=(16, 5))
-for n,encoding_angle in enumerate(combined_df['encoding_angle'].unique()):
+arranged_encoding_angles = arrange_array(combined_df['encoding_angle'].unique())
+for n,encoding_angle in enumerate(arranged_encoding_angles):
     subset = combined_df[combined_df['encoding_angle'] == encoding_angle]
     subset['angular_difference'] = subset['production_angle'] - subset['homing_angle']
     ax = axs[n]
@@ -59,7 +67,7 @@ for n,encoding_angle in enumerate(combined_df['encoding_angle'].unique()):
     sns.histplot(data=subset, x='angular_difference', hue='homing_angle', palette='tab10',kde=True, alpha=0.6, element='step',ax=axs[n])
     ax.axvline(x=0,linestyle=":")
     ax.set(xlabel='Angular Production Error',title=f'Encoding Angle {encoding_angle}°')   
-plt.suptitle(f'Combined Histogram of Angular Error for Same Encoding Angle and Different Homing Angles',fontsize=16)   
+plt.suptitle(f'Combined Histogram of Angular Error for Same Encoding Angle and Different Homing Angles',fontsize=16)  
 plt.show()
 
 

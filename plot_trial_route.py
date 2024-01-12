@@ -194,6 +194,10 @@ if __name__ == "__main__":
     if not os.path.exists(base_output_dir):
         os.makedirs(base_output_dir)
     
+    error_dir = os.path.join(script_dir,"output/error_stats")
+    if not os.path.exists(error_dir):
+            os.makedirs(error_dir)
+    
     for folder_name in folder_names:
         # create an input folder path specific for this category of people
         input_folder_path = os.path.join(base_input_dir, folder_name)
@@ -208,7 +212,8 @@ if __name__ == "__main__":
 
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-
+        
+        
         # processing files in the directory:
         for file in os.listdir(input_folder_path):
             if re.match(r"^\d+\.csv$", file):
@@ -230,17 +235,16 @@ if __name__ == "__main__":
 
                     single_trial = data.iloc[[trial_num-1]].squeeze().to_dict()   
                     theta2_ = visualise_ccq_trial(single_trial,trial_num)
-                    
+                    # Get the current figure and save it
+                    fig = plt.gcf()
+                    save_trial_figure(fig, trial_num, subj_output_dir)
                     # calculate production error for each trial and save it to error_stats folder
                     trial_error = calculate_error(single_trial,theta2_)
                     new_trial_error = pd.DataFrame([trial_error], columns=error_stats.columns)
                     error_stats = pd.concat([error_stats, new_trial_error], ignore_index=True)
-                    error_stats.to_csv(f'output/error_stats/error_{subjid}.csv')
-
-                    # Get the current figure and save it
-                    fig = plt.gcf()
-                    save_trial_figure(fig, trial_num, subj_output_dir)
-    
+                    
+                # save error statistics and run plot_error_distribution.py next
+                error_stats.to_csv(os.path.join(error_dir, f'error_{subjid}.png'))
     
     
 
