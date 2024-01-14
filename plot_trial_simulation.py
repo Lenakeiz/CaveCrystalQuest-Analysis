@@ -7,10 +7,10 @@ from config import color_palette
 import os
 import re
 
-def drawCircArrow(ax,radius,centX,centY,angle_,theta2_,orientation_,arrowDirection_,color_,linewidth = 1.2,label=None):
+def drawCircArrow(ax,radius,centX,centY,angle_,theta2_,orientation_,arrowDirection_,color_,linestyle,linewidth = 1.2,label=None):
     
     # Create the arc (circle in this case)
-    arc = Arc([centX, centY], radius*2, radius*2, angle=angle_, theta1=0, theta2=theta2_, capstyle='round', linestyle='-', lw=linewidth, color=color_)
+    arc = Arc([centX, centY], radius*2, radius*2, angle=angle_, theta1=0, theta2=theta2_, capstyle='round', linestyle=linestyle, lw=linewidth, color=color_)
     ax.add_patch(arc)
     
     # Create triangle as arrow head (not needed for a full circle, but included as per function definition)
@@ -33,8 +33,19 @@ def calculateProductionAngle(productionDirection,crystalDirection,isClockwise):
         theta2_ = productionDirection - angle_
         orientation_ = math.radians(angle_+theta2_)
         arrowDirection_ = theta2_+angle_  
-    return angle_, theta2_, orientation_, arrowDirection_    
-        
+    return angle_, theta2_, orientation_, arrowDirection_  
+
+def calculateEncodeAngle(encodingAngle,originalAngle,isEncodingClockwise):
+    theta2_ = encodingAngle
+    if isEncodingClockwise:
+        angle_ = originalAngle - encodingAngle
+        orientation_ = math.radians(angle_-180)
+        arrowDirection_ = angle_
+    else:
+        angle_ = originalAngle
+        orientation_ = math.radians(angle_+theta2_)
+        arrowDirection_ = theta2_+angle_
+    return angle_,theta2_,orientation_,arrowDirection_    
 
 def drawTheoryTurns(encodingAngle):
     #plotting variables
@@ -50,7 +61,7 @@ def drawTheoryTurns(encodingAngle):
 
 
     originalAngle = 90
-    productionDirection = 270
+    productionDirection = 250
     isEncodingClockwise = True
 
     ax = plt.gca()
@@ -74,32 +85,25 @@ def drawTheoryTurns(encodingAngle):
     plt.plot(crystalOrigin_x,crystalOrigin_z,marker="d",markersize=crystal_marker_size_spawn,color=encoding_angle_color,alpha=1.0)
 
     # i: plot encoding angle
-    theta2_ = encodingAngle
-    if isEncodingClockwise:
-        angle_ = originalAngle - encodingAngle
-        orientation_ = math.radians(angle_-180)
-        arrowDirection_ = angle_
-    else:
-        angle_ = originalAngle
-        orientation_ = math.radians(angle_+theta2_)
-        arrowDirection_ = theta2_+angle_
-    drawCircArrow(ax,0.5,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=encoding_angle_color, linewidth=circular_arrow_width, label=f"Encoding Angle {encodingAngle}°")
+    angle_,theta2_,orientation_,arrowDirection_ = calculateEncodeAngle(encodingAngle,originalAngle,isEncodingClockwise)
+    drawCircArrow(ax,0.55,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=encoding_angle_color,linestyle='-',linewidth=circular_arrow_width, label=f"Encoded Angle {encodingAngle}°")
+    
 
     # f: plot the direction facing where the crystal is found
     plt.plot([0, crystalOrigin_x], [0, crystalOrigin_z], linestyle=':', lw=line_width, color=encoding_angle_color)
 
     # c: plot homing direction and point
-    plt.plot([0,0], [0,-0.9], lw=line_width, linestyle='--', color=production_angle_color)
-    plt.plot(0,-0.9,marker="d",markersize=starting_marker_size,color=production_angle_color)
+    plt.plot([0,-0.25], [0,-0.9], lw=line_width, linestyle='--', color=production_angle_color)
+    plt.plot(-0.25,-0.9,marker="d",markersize=starting_marker_size,color=production_angle_color)
 
     # j: plot production angles 
-    isClockwise = True
-    angle_, theta2_, orientation_, arrowDirection_ = calculateProductionAngle(productionDirection,crystalDirection,isClockwise)
-    drawCircArrow(ax,0.6,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linewidth=circular_arrow_width)
+    # isClockwise = True
+    # angle_, theta2_, orientation_, arrowDirection_ = calculateProductionAngle(productionDirection,crystalDirection,isClockwise)
+    # drawCircArrow(ax,0.6,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color,linestyle='-',linewidth=circular_arrow_width)
 
     isClockwise = False
     angle_, theta2_, orientation_, arrowDirection_ = calculateProductionAngle(productionDirection,crystalDirection,isClockwise)
-    drawCircArrow(ax,0.7,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linewidth=circular_arrow_width)
+    drawCircArrow(ax,0.7,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linestyle='-',linewidth=circular_arrow_width,label="Production Angle 100°")
     
     # Set the limits for x-axis and y-axis
     plt.axis('equal')
@@ -133,6 +137,6 @@ if __name__ == "__main__":
     if not os.path.exists(simulation_dir):
         os.makedirs(simulation_dir)  
 
-    encodingAngleList = [60,300,135,225]
+    encodingAngleList = [300]
     for encodingAngle in encodingAngleList:
         drawTheoryTurns(encodingAngle)

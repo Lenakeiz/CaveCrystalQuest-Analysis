@@ -42,6 +42,89 @@ def arrange_array(arr):
 # plt.show()
 
 
+
+
+# Is encoding the only source of angular error?
+# histograms
+fig, axs = plt.subplots(1, 4, figsize=(16, 5))
+arranged_encoding_angles = arrange_array(combined_df['encoding_angle'].unique())
+for n,encoding_angle in enumerate(arranged_encoding_angles):
+    subset = combined_df[combined_df['encoding_angle'] == encoding_angle]
+    subset['angular_difference'] = subset['production_angle'] - subset['homing_angle']
+    ax = axs[n]
+    sns.color_palette("Set2")
+    sns.histplot(data=subset, x='angular_difference', hue='homing_angle', palette='tab10',kde=True, alpha=0.6, element='step',ax=axs[n])
+    ax.axvline(x=0,linestyle=":")
+    ax.set(xlabel='Angular Production Error',title=f'Encoding Angle {encoding_angle}°')   
+plt.suptitle(f'Combined Histogram of Angular Error for Same Encoding Angle and Different Homing Angles',fontsize=16)  
+plt.show()
+
+# polar histograms of production angles for same encoding angles 
+fig, axs = plt.subplots(1, 4, figsize=(20, 5),subplot_kw={'projection': 'polar'})
+arranged_encoding_angles = arrange_array(combined_df['encoding_angle'].unique())
+for n,encoding_angle in enumerate(arranged_encoding_angles):
+    subset = combined_df[combined_df['encoding_angle'] == encoding_angle]
+    ax = axs[n]
+    num_bins = 90
+    bins = np.linspace(0, 2 * np.pi, num_bins + 1)
+    # Histogram data
+    homing_angles = np.sort(subset['homing_angle'].unique())
+
+    df1 = subset[subset['homing_angle'] == homing_angles[0]]['production_angle']
+    df2 = subset[subset['homing_angle'] == homing_angles[1]]['production_angle']
+
+    hist1, _ = np.histogram(np.radians(df1), bins)
+    hist2, _ = np.histogram(np.radians(df2), bins)
+
+    # Bin width
+    width = bins[1] - bins[0]
+
+    # Plotting the bars
+    ax.bar(bins[:-1], hist1, width=width, alpha=0.7, color='blue', label=f'Homing Angle {homing_angles[0]}°')
+    ax.bar(bins[:-1], hist2, width=width, alpha=0.7, color='orange', bottom=hist1, label=f'Homing Angle {homing_angles[1]}°')
+
+    # Customizations
+    ax.set_theta_zero_location('N')  # Set 0 degrees at the top
+    ax.set_theta_direction(-1)       # Clockwise
+    ax.set_title('Production Angle Distribution by Homing Angle', va='bottom')
+    ax.legend(loc='lower center', bbox_to_anchor=(0.5, -0.5))
+    ax.set(xlabel='Angular Production ',title=f'Encoding Angle {encoding_angle}°')   
+plt.suptitle(f'Combined Histogram of Angular Production for Same Encoding Angle and Different Homing Angles',fontsize=16)  
+plt.show()
+
+# polar histograms of production error for same encoding angles 
+fig, axs = plt.subplots(1, 4, figsize=(20, 5),subplot_kw={'projection': 'polar'})
+arranged_encoding_angles = arrange_array(combined_df['encoding_angle'].unique())
+for n,encoding_angle in enumerate(arranged_encoding_angles):
+    subset = combined_df[combined_df['encoding_angle'] == encoding_angle]
+    ax = axs[n]
+    num_bins = 72
+    bins = np.linspace(0,2*np.pi, num_bins + 1) # polar histogram default range is 0 to 2 pi
+    # Histogram data
+    homing_angles = np.sort(subset['homing_angle'].unique()) 
+    subset['angular_difference'] = subset['production_angle'] - subset['homing_angle'] +180
+    df1 = subset[subset['homing_angle'] == homing_angles[0]]['angular_difference']
+    df2 = subset[subset['homing_angle'] == homing_angles[1]]['angular_difference']
+    hist1, _ = np.histogram(np.radians(df1), bins)
+    hist2, _ = np.histogram(np.radians(df2), bins)
+
+    # Bin width
+    width = bins[1] - bins[0]
+
+    # Plotting the bars
+    ax.bar(bins[:-1], hist1, width=width, alpha=0.7, color='blue', label=f'Homing Angle {homing_angles[0]}°')
+    ax.bar(bins[:-1], hist2, width=width, alpha=0.7, color='orange', label=f'Homing Angle {homing_angles[1]}°')
+
+    # Customizations
+    ax.set_theta_zero_location('S')  # Set 0 degrees at the top
+    ax.set_theta_direction(-1)       # Clockwise
+    ax.set_xticklabels([f"{x}°" for x in range(-180, 180, int(360/num_bins)*9)])
+    ax.set_title('Production Angle Distribution by Homing Angle', va='bottom')
+    ax.legend(loc='lower center', bbox_to_anchor=(0.5, -0.5))
+    ax.set(xlabel='Angular Production Error ',title=f'Encoding Angle {encoding_angle}°')   
+plt.suptitle(f'Combined Histogram of Angular Production for Same Encoding Angle and Different Homing Angles',fontsize=16)  
+plt.show()
+
 # Is production the only source of angular error?
 fig, axs = plt.subplots(1, 4, figsize=(16, 5))
 arranged_homing_angles = arrange_array(combined_df['homing_angle'].unique())
@@ -56,18 +139,37 @@ for n,homing_angle in enumerate(arranged_homing_angles):
 plt.suptitle(f'Combined Histogram of Angular Error for Same Homing Angle and Different Encoding Angles',fontsize=16)   
 plt.show()
 
-# Is encoding the only source of angular error?
-fig, axs = plt.subplots(1, 4, figsize=(16, 5))
-arranged_encoding_angles = arrange_array(combined_df['encoding_angle'].unique())
-for n,encoding_angle in enumerate(arranged_encoding_angles):
-    subset = combined_df[combined_df['encoding_angle'] == encoding_angle]
-    subset['angular_difference'] = subset['production_angle'] - subset['homing_angle']
+# polar histograms of production error for same homing angles 
+fig, axs = plt.subplots(1, 4, figsize=(20, 5),subplot_kw={'projection': 'polar'})
+arranged_homing_angles = arrange_array(combined_df['homing_angle'].unique())
+for n,homing_angle in enumerate(arranged_homing_angles):
+    subset = combined_df[combined_df['homing_angle'] == homing_angle]
     ax = axs[n]
-    sns.color_palette("Set2")
-    sns.histplot(data=subset, x='angular_difference', hue='homing_angle', palette='tab10',kde=True, alpha=0.6, element='step',ax=axs[n])
-    ax.axvline(x=0,linestyle=":")
-    ax.set(xlabel='Angular Production Error',title=f'Encoding Angle {encoding_angle}°')   
-plt.suptitle(f'Combined Histogram of Angular Error for Same Encoding Angle and Different Homing Angles',fontsize=16)  
+    num_bins = 72
+    bins = np.linspace(0,2*np.pi, num_bins + 1) # polar histogram default range is 0 to 2 pi
+    # Histogram data
+    encoding_angles = np.sort(subset['encoding_angle'].unique()) 
+    subset['angular_difference'] = subset['production_angle'] - subset['homing_angle'] +180
+    df1 = subset[subset['encoding_angle'] == encoding_angles[0]]['angular_difference']
+    df2 = subset[subset['encoding_angle'] == encoding_angles[1]]['angular_difference']
+    hist1, _ = np.histogram(np.radians(df1), bins)
+    hist2, _ = np.histogram(np.radians(df2), bins)
+
+    # Bin width
+    width = bins[1] - bins[0]
+
+    # Plotting the bars
+    ax.bar(bins[:-1], hist1, width=width, alpha=0.7, color='green', label=f'Encoding Angle {encoding_angles[0]}°')
+    ax.bar(bins[:-1], hist2, width=width, alpha=0.7, color='red', label=f'Encoding Angle {encoding_angles[1]}°')
+
+    # Customizations
+    ax.set_theta_zero_location('S')  # Set 0 degrees at the top
+    ax.set_theta_direction(-1)       # Clockwise
+    ax.set_xticklabels([f"{x}°" for x in range(-180, 180, int(360/num_bins)*9)])
+    ax.set_title('Production Angle Distribution by Homing Angle', va='bottom')
+    ax.legend(loc='lower center', bbox_to_anchor=(0.5, -0.5))
+    ax.set(xlabel='Angular Production Error ',title=f'Homing Angle {homing_angle}°')   
+plt.suptitle(f'Combined Histogram of Angular Production for Same Encoding Angle and Different Homing Angles',fontsize=16)  
 plt.show()
 
 
