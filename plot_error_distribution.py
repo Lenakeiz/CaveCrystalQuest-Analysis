@@ -3,6 +3,14 @@ import numpy as np
 import os
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy import stats
+from config import color_palette
+
+homing_angle_color1 = color_palette[5]
+homing_angle_color2 = color_palette[6]
+encoding_angle_color1 = color_palette[7]
+encoding_angle_color2 = color_palette[8]
+
 
 # from plot_trial_route generate production error csv file
 folder_path = os.path.join(os.path.dirname(__file__),'output/error_stats') # Replace with the path to your folder
@@ -65,14 +73,23 @@ arranged_encoding_angles = arrange_array(combined_df['encoding_angle'].unique())
 for n,encoding_angle in enumerate(arranged_encoding_angles):
     subset = combined_df[combined_df['encoding_angle'] == encoding_angle]
     ax = axs[n]
-    num_bins = 90
+    num_bins = 72
     bins = np.linspace(0, 2 * np.pi, num_bins + 1)
     # Histogram data
     homing_angles = np.sort(subset['homing_angle'].unique())
 
     df1 = subset[subset['homing_angle'] == homing_angles[0]]['production_angle']
     df2 = subset[subset['homing_angle'] == homing_angles[1]]['production_angle']
-
+    
+    # Shapiro-Wilk Normality Test
+    res1 = stats.shapiro(df1)
+    res2 = stats.shapiro(df2)
+    print(f'Normal Distribution: Homing angle {homing_angles[0]}° W = {round(res1.statistic,3)}, p = {round(res1.pvalue,5)}')
+    print(f'Normal Distribution: Homing angle {homing_angles[1]}° W = {round(res2.statistic,3)}, p = {round(res2.pvalue,5)}') 
+    # Levene's Test 
+    res3 = stats.levene(df1,df2)
+    print(f'Homogeneity of Variance: F = {round(res3.statistic,3)}, p = {round(res3.pvalue,3)}')  
+    
     hist1, _ = np.histogram(np.radians(df1), bins)
     hist2, _ = np.histogram(np.radians(df2), bins)
 
@@ -80,8 +97,11 @@ for n,encoding_angle in enumerate(arranged_encoding_angles):
     width = bins[1] - bins[0]
 
     # Plotting the bars
-    ax.bar(bins[:-1], hist1, width=width, alpha=0.7, color='blue', label=f'Homing Angle {homing_angles[0]}°')
-    ax.bar(bins[:-1], hist2, width=width, alpha=0.7, color='orange', bottom=hist1, label=f'Homing Angle {homing_angles[1]}°')
+    ax.bar(bins[:-1], hist1, width=width, color=color_palette[5], label=f'Homing Angle {homing_angles[0]}°')
+    ax.bar(bins[:-1], hist2, width=width, color=color_palette[6], bottom=hist1, label=f'Homing Angle {homing_angles[1]}°')
+    # Plotting homing angles
+    ax.axvline(x=np.radians(homing_angles[0]),ymin=0,ymax=4,color='k')
+    ax.axvline(x=np.radians(homing_angles[1]),ymin=0,ymax=4,color='k')
 
     # Customizations
     ax.set_theta_zero_location('N')  # Set 0 degrees at the top
@@ -112,8 +132,11 @@ for n,encoding_angle in enumerate(arranged_encoding_angles):
     width = bins[1] - bins[0]
 
     # Plotting the bars
-    ax.bar(bins[:-1], hist1, width=width, alpha=0.7, color='blue', label=f'Homing Angle {homing_angles[0]}°')
-    ax.bar(bins[:-1], hist2, width=width, alpha=0.7, color='orange', label=f'Homing Angle {homing_angles[1]}°')
+    ax.bar(bins[:-1], hist1, width=width, color=color_palette[5], label=f'Homing Angle {homing_angles[0]}°')
+    ax.bar(bins[:-1], hist2, width=width, color=color_palette[6], label=f'Homing Angle {homing_angles[1]}°')
+    
+
+
 
     # Customizations
     ax.set_theta_zero_location('S')  # Set 0 degrees at the top
@@ -124,6 +147,9 @@ for n,encoding_angle in enumerate(arranged_encoding_angles):
     ax.set(xlabel='Angular Production Error ',title=f'Encoding Angle {encoding_angle}°')   
 plt.suptitle(f'Combined Histogram of Angular Production for Same Encoding Angle and Different Homing Angles',fontsize=16)  
 plt.show()
+
+
+
 
 # Is production the only source of angular error?
 fig, axs = plt.subplots(1, 4, figsize=(16, 5))
@@ -138,6 +164,44 @@ for n,homing_angle in enumerate(arranged_homing_angles):
     ax.set(xlabel='Angular Production Error',title=f'Homing Angle {homing_angle}°')   
 plt.suptitle(f'Combined Histogram of Angular Error for Same Homing Angle and Different Encoding Angles',fontsize=16)   
 plt.show()
+
+
+# polar histograms of production angles for same homing angles 
+fig, axs = plt.subplots(1, 4, figsize=(20, 5),subplot_kw={'projection': 'polar'})
+arranged_homing_angles = arrange_array(combined_df['homing_angle'].unique())
+for n,homing_angle in enumerate(arranged_homing_angles):
+    subset = combined_df[combined_df['homing_angle'] == homing_angle]
+    ax = axs[n]
+    num_bins = 72
+    bins = np.linspace(0, 2 * np.pi, num_bins + 1)
+    # Histogram data
+    encoding_angles = np.sort(subset['encoding_angle'].unique())
+
+    df1 = subset[subset['encoding_angle'] == encoding_angles[0]]['production_angle']
+    df2 = subset[subset['encoding_angle'] == encoding_angles[1]]['production_angle']
+
+    hist1, _ = np.histogram(np.radians(df1), bins)
+    hist2, _ = np.histogram(np.radians(df2), bins)
+
+    # Bin width
+    width = bins[1] - bins[0]
+
+    # Plotting the bars
+    ax.bar(bins[:-1], hist1, width=width, color=color_palette[7], label=f'Encoding Angle {encoding_angles[0]}°')
+    ax.bar(bins[:-1], hist2, width=width, color=color_palette[8], bottom=hist1, label=f'Encoding Angle {encoding_angles[1]}°')
+    # Plotting homing angles
+    ax.axvline(x=np.radians(homing_angle),ymin=0,ymax=4,color='k')
+
+    # Customizations
+    ax.set_theta_zero_location('N')  # Set 0 degrees at the top
+    ax.set_theta_direction(-1)       # Clockwise
+    ax.set_title('Production Angle Distribution by Encoding Angle', va='bottom')
+    ax.legend(loc='lower center', bbox_to_anchor=(0.5, -0.5))
+    ax.set(xlabel='Angular Production ',title=f'Homing Angle {homing_angle}°')   
+plt.suptitle(f'Combined Histogram of Angular Production for Same Homing Angle and Different Encoding Angles',fontsize=16)  
+plt.show()
+
+
 
 # polar histograms of production error for same homing angles 
 fig, axs = plt.subplots(1, 4, figsize=(20, 5),subplot_kw={'projection': 'polar'})
@@ -159,8 +223,8 @@ for n,homing_angle in enumerate(arranged_homing_angles):
     width = bins[1] - bins[0]
 
     # Plotting the bars
-    ax.bar(bins[:-1], hist1, width=width, alpha=0.7, color='green', label=f'Encoding Angle {encoding_angles[0]}°')
-    ax.bar(bins[:-1], hist2, width=width, alpha=0.7, color='red', label=f'Encoding Angle {encoding_angles[1]}°')
+    ax.bar(bins[:-1], hist1, width=width, color=color_palette[7], label=f'Encoding Angle {encoding_angles[0]}°')
+    ax.bar(bins[:-1], hist2, width=width, color=color_palette[8], label=f'Encoding Angle {encoding_angles[1]}°')
 
     # Customizations
     ax.set_theta_zero_location('S')  # Set 0 degrees at the top

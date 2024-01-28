@@ -61,7 +61,7 @@ def drawTheoryTurns(encodingAngle):
 
 
     originalAngle = 90
-    productionDirection = 250
+    productionDirection = 270
     isEncodingClockwise = True
 
     ax = plt.gca()
@@ -93,22 +93,22 @@ def drawTheoryTurns(encodingAngle):
     plt.plot([0, crystalOrigin_x], [0, crystalOrigin_z], linestyle=':', lw=line_width, color=encoding_angle_color)
 
     # c: plot homing direction and point
-    plt.plot([0,-0.25], [0,-0.9], lw=line_width, linestyle='--', color=production_angle_color)
-    plt.plot(-0.25,-0.9,marker="d",markersize=starting_marker_size,color=production_angle_color)
+    plt.plot([0,0], [0,-0.9], lw=line_width, linestyle='--', color=production_angle_color)
+    plt.plot(0,-0.9,marker="d",markersize=starting_marker_size,color=production_angle_color)
 
     # j: plot production angles 
     # isClockwise = True
     # angle_, theta2_, orientation_, arrowDirection_ = calculateProductionAngle(productionDirection,crystalDirection,isClockwise)
-    # drawCircArrow(ax,0.6,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color,linestyle='-',linewidth=circular_arrow_width)
+    # drawCircArrow(ax,0.6,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color,linestyle='-',linewidth=circular_arrow_width,label="Homing Angle 120°")
 
     isClockwise = False
     angle_, theta2_, orientation_, arrowDirection_ = calculateProductionAngle(productionDirection,crystalDirection,isClockwise)
-    drawCircArrow(ax,0.7,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linestyle='-',linewidth=circular_arrow_width,label="Production Angle 100°")
+    drawCircArrow(ax,0.7,0,0,angle_,theta2_,orientation_,arrowDirection_,color_=production_angle_color, linestyle='-',linewidth=circular_arrow_width,label="Homing Angle 240°")
     
     # Set the limits for x-axis and y-axis
     plt.axis('equal')
     plt.axis('off')
-    plt.legend(loc='best', fontsize=text_font_ticks) 
+    plt.legend(loc='best', fontsize=8) 
     plt.show()
 
 
@@ -137,6 +137,6 @@ if __name__ == "__main__":
     if not os.path.exists(simulation_dir):
         os.makedirs(simulation_dir)  
 
-    encodingAngleList = [300]
+    encodingAngleList = [60]
     for encodingAngle in encodingAngleList:
         drawTheoryTurns(encodingAngle)

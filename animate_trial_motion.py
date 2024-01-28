@@ -22,8 +22,8 @@ def animate(i):
     
     return scat,quiv
 
-data = pd.read_csv('data/0000.csv')
-data_tracking = pd.read_csv('data/0000_tracking.csv')
+data = pd.read_csv('CaveCrystalQuest-Analysis/data/0000.csv')
+data_tracking = pd.read_csv('CaveCrystalQuest-Analysis/data/0000_tracking.csv')
 data_tracking['norm_vector'] = np.sqrt(1/(data_tracking['forward_x']**2+data_tracking['forward_z']**2))
 data_tracking['normdir_x'] = data_tracking['forward_x']*data_tracking['norm_vector']
 data_tracking['normdir_z'] = data_tracking['forward_z']*data_tracking['norm_vector']
