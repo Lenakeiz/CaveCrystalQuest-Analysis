@@ -143,7 +143,7 @@ def visualise_ccq_trial(d,trial_num):
     
     return theta2_
 
-def calculate_error(d,theta2_):
+def calculate_error(d,theta2_,subjid,trial_num):
     # k: calculate linear and angular error
     encoding_distance = d['encodingDistance']   
     production_distance = np.sqrt((d['productionDistance_x'] - d['turningEncodingPosition_x'])**2 + (d['productionDistance_z'] - d['turningEncodingPosition_z'])**2)
@@ -164,7 +164,7 @@ def calculate_error(d,theta2_):
 
     production_angle = normalise_angle(theta2_) 
     angular_error = production_angle/homing_angle
-    trial_error = [encoding_angle, homing_angle, np.round(production_angle,3), np.round(angular_error,3), encoding_distance,np.round(production_distance,3), np.round(linear_error,3)]
+    trial_error = [subjid, trial_num, encoding_angle, homing_angle, np.round(production_angle,3), np.round(angular_error,3), encoding_distance,np.round(production_distance,3), np.round(linear_error,3)]
     return trial_error
     # print(f"Trial the encoding_angle is {encoding_angle}, the homing_angle is {homing_angle}, the production_angle is {production_angle}, the angular error is {angular_error:3f}. the encoding distance is {encoding_distance:3f}, the production distance is {production_distance:3f}, the linear error is {linear_error:3f}")
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
                 data_path = os.path.join(input_folder_path, file)
                 data = pd.read_csv(os.path.join(data_path))
-                error_stats = pd.DataFrame(columns=['encoding_angle', 'homing_angle', 'production_angle', 'angular_error', 'encoding_distance','production_distance', 'linear_error'])
+                error_stats = pd.DataFrame(columns=['subject_id','trial_number','encoding_angle', 'homing_angle', 'production_angle', 'angular_error', 'encoding_distance','production_distance', 'linear_error'])
 
                 for trial_num in data['sequenceNumber']:
 
@@ -239,12 +239,12 @@ if __name__ == "__main__":
                     fig = plt.gcf()
                     save_trial_figure(fig, trial_num, subj_output_dir)
                     # calculate production error for each trial and save it to error_stats folder
-                    trial_error = calculate_error(single_trial,theta2_)
+                    trial_error = calculate_error(single_trial,theta2_,subjid,trial_num)
                     new_trial_error = pd.DataFrame([trial_error], columns=error_stats.columns)
                     error_stats = pd.concat([error_stats, new_trial_error], ignore_index=True)
                     
                 # save error statistics and run plot_error_distribution.py next
-                error_stats.to_csv(os.path.join(error_dir, f'error_{subjid}.png'))
+                error_stats.to_csv(os.path.join(error_dir, f'error_{subjid}.csv'))
     
     
 

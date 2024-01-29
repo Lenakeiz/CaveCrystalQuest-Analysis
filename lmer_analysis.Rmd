@@ -1,0 +1,65 @@
+---
+title: "stats_analysis"
+output: html_document
+date: "2024-01-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(dplyr)
+library(lme4)
+library(lmerTest)
+library(nlme)
+```
+
+```{r}
+setwd("/Users/eggriel/path_integration/CaveCrystalQuest-Analysis/output/error_stats")
+# List all the CSV files in the directory
+file_list <- list.files(pattern = "error_\\d{1,2}\\.csv")
+
+# Initialize an empty data frame to store the combined data
+combined_data <- data.frame()
+
+# Loop through each CSV file and combine them
+for (file in file_list) {
+  # Read the CSV file into a data frame
+  current_data <- read.csv(file)
+  # Combine the data frames
+  combined_data <- rbind(combined_data, current_data)
+}
+
+combined_data <- combined_data %>% mutate(subject_id = as.factor(subject_id),
+                                          angular_error1 = production_angle-homing_angle)
+glm_mdl = glm(angular_error1 ~ encoding_angle * homing_angle, data=combined_data)
+summary(glm_mdl)
+```
+
+```{r}
+glmer_mdl = lmer(angular_error1 ~ encoding_angle * homing_angle + (1|subject_id), data=combined_data)
+summary(glmer_mdl)
+```
+
+
+
+```{r}
+combined_data_categorical <- combined_data %>% mutate(encoding_angle = as.factor(encoding_angle),
+                                                      homing_angle = as.factor(homing_angle))
+lm_mdl = lm(angular_error1 ~ encoding_angle + homing_angle, data=combined_data_categorical)
+summary(lm_mdl)
+```
+
+```{r}
+lmer_mdl = lmer(angular_error1 ~ encoding_angle * homing_angle + (1|subject_id), data=combined_data_categorical)
+
+summary(lmer_mdl)
+```
+```{r}
+lme_mdl <- lme(angular_error1 ~ encoding_angle * homing_angle,random=~1|subject_id,data=combined_data_categorical)
+anova(lme_mdl)
+```
+
