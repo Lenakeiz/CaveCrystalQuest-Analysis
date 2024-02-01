@@ -33,14 +33,28 @@ for (file in file_list) {
   combined_data <- rbind(combined_data, current_data)
 }
 
-combined_data <- combined_data %>% mutate(subject_id = as.factor(subject_id),
-                                          angular_error1 = production_angle-homing_angle)
-glm_mdl = glm(angular_error1 ~ encoding_angle * homing_angle, data=combined_data)
+combined_data <- combined_data %>% mutate(subject_id = as.factor(subject_id))
+```
+
+
+```{r}
+linear_mdl = lmer(linear_error ~ encoding_distance + (1|subject_id), data=combined_data)
+summary(linear_mdl)
+```
+
+```{r}
+linear_mdl = lmer(location_error ~ encoding_angle + (1|subject_id), data=combined_data)
+summary(linear_mdl)
+```
+
+
+```{r}
+glm_mdl = glm(angular_error ~ encoding_angle * homing_angle, data=combined_data)
 summary(glm_mdl)
 ```
 
 ```{r}
-glmer_mdl = lmer(angular_error1 ~ encoding_angle * homing_angle + (1|subject_id), data=combined_data)
+glmer_mdl = lmer(angular_error ~ encoding_angle * homing_angle + (1|subject_id), data=combined_data)
 summary(glmer_mdl)
 ```
 
@@ -59,7 +73,6 @@ lmer_mdl = lmer(angular_error1 ~ encoding_angle * homing_angle + (1|subject_id),
 summary(lmer_mdl)
 ```
 ```{r}
-lme_mdl <- lme(angular_error1 ~ encoding_angle * homing_angle,random=~1|subject_id,data=combined_data_categorical)
-anova(lme_mdl)
+
 ```
 

@@ -89,6 +89,12 @@ def add_route(d_tracking,d,ax):
     if d_tracking['timestamp'] > d['timeAtStartProductionDistance']:
         # g: plot homing direction
         plt.arrow(d['turningEncodingPosition_x'], d['turningEncodingPosition_z'], d['productionDirection_x'], d['productionDirection_z'],head_width = 0.2,lw=2,color=production_angle_color)
+        
+        # dotted line extending homing direction
+        plt.arrow(d['turningEncodingPosition_x'], d['turningEncodingPosition_z'], 2*d['productionDirection_x'], 2*d['productionDirection_z'],head_length=None,linestyle=':', color=production_angle_color)
+
+        # plt.arrow(d['turningEncodingPosition_x'], d['turningEncodingPosition_z'], d['productionDistance_x'],d['productionDistance_z'],head_width = 0.2,lw=2,color=production_angle_color)
+        
         # h: plot where cystal is placed
         plt.plot(d['productionDistance_x'],d['productionDistance_z'],marker="d",markersize=16,color=production_angle_color)
     plt.xlabel('X Position', fontsize=10)

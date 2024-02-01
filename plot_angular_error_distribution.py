@@ -4,7 +4,7 @@ import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy import stats
-from config import color_palette
+from config import color_palette, excluded_dict
 
 homing_angle_color1 = color_palette[5]
 homing_angle_color2 = color_palette[6]
@@ -28,6 +28,8 @@ for file in all_files:
 
 # Combine all data into a single DataFrame
 combined_df = pd.concat(all_data, ignore_index=True)
+exclude_mask = combined_df.apply(lambda df: (df['subject_id'], df['trial_number']) in excluded_dict, axis=1)
+combined_df = combined_df[~exclude_mask]
 
 def arrange_array(arr):
     sorted_arr = np.sort(arr)
@@ -35,12 +37,12 @@ def arrange_array(arr):
     return arranged_arr
 
 # f = sns.FacetGrid(combined_df, col='encoding_angle', col_wrap=4) 
-# f.map(sns.histplot, 'angular_error',binwidth=0.05,kde=True)
+# f.map(sns.histplot, 'prop_angular_error',binwidth=0.05,kde=True)
 # f.set(xlim=(0,2),xlabel='Angular Error')
 # plt.show()
 
 # g = sns.FacetGrid(combined_df, col='homing_angle', col_wrap=4)
-# g.map(sns.histplot, 'angular_error',binwidth=0.05,kde=True)
+# g.map(sns.histplot, 'prop_angular_error',binwidth=0.05,kde=True)
 # g.set(xlim=(0,2),xlabel='Angular Error')
 # plt.show()
 
@@ -58,10 +60,9 @@ fig, axs = plt.subplots(1, 4, figsize=(16, 5))
 arranged_encoding_angles = arrange_array(combined_df['encoding_angle'].unique())
 for n,encoding_angle in enumerate(arranged_encoding_angles):
     subset = combined_df[combined_df['encoding_angle'] == encoding_angle]
-    subset['angular_difference'] = subset['production_angle'] - subset['homing_angle']
     ax = axs[n]
     sns.color_palette("Set2")
-    sns.histplot(data=subset, x='angular_difference', hue='homing_angle', palette='tab10',kde=True, alpha=0.6, element='step',ax=axs[n])
+    sns.histplot(data=subset, x='angular_error', hue='homing_angle', palette='tab10',kde=True, alpha=0.6, element='step',ax=axs[n])
     ax.axvline(x=0,linestyle=":")
     ax.set(xlabel='Angular Production Error',title=f'Encoding Angle {encoding_angle}°')   
 plt.suptitle(f'Combined Histogram of Angular Error for Same Encoding Angle and Different Homing Angles',fontsize=16)  
@@ -122,9 +123,8 @@ for n,encoding_angle in enumerate(arranged_encoding_angles):
     bins = np.linspace(0,2*np.pi, num_bins + 1) # polar histogram default range is 0 to 2 pi
     # Histogram data
     homing_angles = np.sort(subset['homing_angle'].unique()) 
-    subset['angular_difference'] = subset['production_angle'] - subset['homing_angle'] +180
-    df1 = subset[subset['homing_angle'] == homing_angles[0]]['angular_difference']
-    df2 = subset[subset['homing_angle'] == homing_angles[1]]['angular_difference']
+    df1 = subset[subset['homing_angle'] == homing_angles[0]]['angular_error']
+    df2 = subset[subset['homing_angle'] == homing_angles[1]]['angular_error']
     hist1, _ = np.histogram(np.radians(df1), bins)
     hist2, _ = np.histogram(np.radians(df2), bins)
 
@@ -156,10 +156,9 @@ fig, axs = plt.subplots(1, 4, figsize=(16, 5))
 arranged_homing_angles = arrange_array(combined_df['homing_angle'].unique())
 for n,homing_angle in enumerate(arranged_homing_angles):
     subset = combined_df[combined_df['homing_angle'] == homing_angle]
-    subset['angular_difference'] = subset['production_angle'] - homing_angle
     ax = axs[n]
     sns.color_palette("Set2")
-    sns.histplot(data=subset, x='angular_difference', hue='encoding_angle', palette='Set2',kde=True, alpha=0.6, element='step',ax=axs[n])
+    sns.histplot(data=subset, x='angular_error', hue='encoding_angle', palette='Set2',kde=True, alpha=0.6, element='step',ax=axs[n])
     ax.axvline(x=0,linestyle=":")
     ax.set(xlabel='Angular Production Error',title=f'Homing Angle {homing_angle}°')   
 plt.suptitle(f'Combined Histogram of Angular Error for Same Homing Angle and Different Encoding Angles',fontsize=16)   
@@ -213,9 +212,8 @@ for n,homing_angle in enumerate(arranged_homing_angles):
     bins = np.linspace(0,2*np.pi, num_bins + 1) # polar histogram default range is 0 to 2 pi
     # Histogram data
     encoding_angles = np.sort(subset['encoding_angle'].unique()) 
-    subset['angular_difference'] = subset['production_angle'] - subset['homing_angle'] +180
-    df1 = subset[subset['encoding_angle'] == encoding_angles[0]]['angular_difference']
-    df2 = subset[subset['encoding_angle'] == encoding_angles[1]]['angular_difference']
+    df1 = subset[subset['encoding_angle'] == encoding_angles[0]]['angular_error']
+    df2 = subset[subset['encoding_angle'] == encoding_angles[1]]['angular_error']
     hist1, _ = np.histogram(np.radians(df1), bins)
     hist2, _ = np.histogram(np.radians(df2), bins)
 
