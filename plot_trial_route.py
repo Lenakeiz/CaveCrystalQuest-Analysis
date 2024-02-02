@@ -79,7 +79,7 @@ def visualise_ccq_trial(d,trial_num):
     
     # e: plot where crystal is found
     encodingAngle = d['encodingAngle']                  
-    if d['isEncodingClockwise'] is False:
+    if d['isEncodingClockwise'] == False:
         encodingAngle = -encodingAngle 
     originalAngle = math.atan2(d['turningEncodingPosition_z'] - d['startingCorner_z'], d['turningEncodingPosition_x'] - d['startingCorner_x'])
     crystalDirection = originalAngle-math.radians(encodingAngle)
@@ -88,7 +88,7 @@ def visualise_ccq_trial(d,trial_num):
     
     # i: plot encoding angle
     theta2_ = d['encodingAngle']
-    if d['isEncodingClockwise']:
+    if d['isEncodingClockwise'] == True:
         angle_ = math.degrees(originalAngle) - d['encodingAngle']
         orientation_ = math.radians(angle_-180)
         arrowDirection_ = angle_
@@ -214,11 +214,11 @@ if __name__ == "__main__":
         print(f"Processing folder {input_folder_path}...")
 
         if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        
+            os.makedirs(output_dir)        
         
         # processing files in the directory:
         for file in os.listdir(input_folder_path):
+            # Regular expression to match the file name
             if re.match(r"^\d+\.csv$", file):
                 subjid = file.split('.')[0]
                 subjid = re.match(r"^\d+", file).group(0)
@@ -230,6 +230,8 @@ if __name__ == "__main__":
 
                 data_path = os.path.join(input_folder_path, file)
                 data = pd.read_csv(os.path.join(data_path))
+
+                # creating a dataframe to store the calculated metrics
                 error_stats = pd.DataFrame(columns=['subject_id','trial_number','encoding_angle', 'homing_angle', 'production_angle', 'angular_error', 'encoding_distance','production_distance', 'linear_error','location_error','prop_angular_error','prop_linear_error','start_position_x','start_position_z','target_position_x','target_position_z'])
 
                 for trial_num in data['sequenceNumber']:
