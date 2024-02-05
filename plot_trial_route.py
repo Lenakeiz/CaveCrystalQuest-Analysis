@@ -168,7 +168,6 @@ def calculate_error(d,theta2_,subjid,trial_num):
     prop_angular_error = production_angle / homing_angle
     trial_error = [subjid, trial_num, encoding_angle, homing_angle, np.round(production_angle,3), np.round(angular_error,3), encoding_distance,np.round(production_distance,3), np.round(linear_error,3),np.round(location_error,3),np.round(prop_angular_error,3),np.round(prop_linear_error,3),d['startingCorner_x'],d['startingCorner_z'],d['productionDistance_x'],d['productionDistance_z']]
     return trial_error
-    # print(f"Trial the encoding_angle is {encoding_angle}, the homing_angle is {homing_angle}, the production_angle is {production_angle}, the angular error is {angular_error:3f}. the encoding distance is {encoding_distance:3f}, the production distance is {production_distance:3f}, the linear error is {linear_error:3f}")
 
 def save_trial_figure(fig, trial_num, output_dir):
     """
