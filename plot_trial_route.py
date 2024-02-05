@@ -123,8 +123,7 @@ def visualise_ccq_trial(d,trial_num):
     end_x = start_x + d['productionDirection_x']
     end_z = start_z + d['productionDirection_z']
     plt.plot([d['turningEncodingPosition_x'], d['productionDistance_x']], [d['turningEncodingPosition_z'], d['productionDistance_z']], lw=line_width, linestyle='--', color=production_angle_color, label="Production Distance")
-    #plt.arrow(d['turningEncodingPosition_x'], d['turningEncodingPosition_z'], d['productionDirection_x'], d['productionDirection_z'],head_width = head_width,lw=line_width,color=production_angle_color, length_includes_head=True)
-
+ 
     # h: plot where cystal is placed
     plt.plot(d['productionDistance_x'],d['productionDistance_z'],marker="d",markersize=crystal_marker_size_reposition,color=production_angle_color)
          
