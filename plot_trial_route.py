@@ -100,7 +100,7 @@ def visualise_ccq_trial(d,trial_num):
     
     # j: plot production angle    
     productionDirection = math.degrees(math.atan2(d['productionDirection_z'],d['productionDirection_x']))
-    if d['isProductionClockwise']:
+    if d['isProductionClockwise'] == True:
         angle_ = productionDirection
         theta2_ = math.degrees(crystalDirection) - productionDirection
         orientation_ = math.radians(angle_-180)
